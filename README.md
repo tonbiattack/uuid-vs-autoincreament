@@ -52,42 +52,66 @@ go run ./cmd/benchmark_ids --help
 - `--mysql-host`, `--mysql-port`, `--mysql-user`, `--mysql-password`
 - `--pg-host`, `--pg-port`, `--pg-user`, `--pg-password`
 
-## 実測結果（2026-02-14, ローカル 2回実行）
+## 実測結果（2026-02-14, ローカル 3回実行）
 
 実行コマンド:
 
 ```bash
-go run ./cmd/benchmark_ids --rows 1000 --lookups 2000
+for i in 1 2 3; do
+  echo "=== run $i ==="
+  go run ./cmd/benchmark_ids --rows 10000 --lookups 2000
+done
 ```
 
 Run 1:
 
 | db | table | insert_sec | point_sec | range_or_orderby_sec |
 | --- | --- | ---: | ---: | ---: |
-| mysql | bench_auto | 2.142952 | 0.391254 | 0.001031 |
-| mysql | bench_uuid_char | 2.527369 | 0.398403 | 0.001058 |
-| mysql | bench_uuid_bin | 2.323556 | 0.331964 | 0.001039 |
-| postgres | bench_auto | 1.019597 | 0.311246 | 0.001042 |
-| postgres | bench_uuid | 0.930424 | 0.416015 | 0.001037 |
+| mysql | bench_auto | 18.192566 | 0.271273 | 0.000938 |
+| mysql | bench_uuid_char | 18.778375 | 0.272474 | 0.001301 |
+| mysql | bench_uuid_bin | 40.900365 | 0.296230 | 0.001380 |
+| postgres | bench_auto | 6.069807 | 0.240588 | 0.000842 |
+| postgres | bench_uuid | 6.342978 | 0.321057 | 0.003509 |
 
 Run 2:
 
 | db | table | insert_sec | point_sec | range_or_orderby_sec |
 | --- | --- | ---: | ---: | ---: |
-| mysql | bench_auto | 2.306792 | 0.335647 | 0.000551 |
-| mysql | bench_uuid_char | 2.380259 | 0.410193 | 0.000517 |
-| mysql | bench_uuid_bin | 2.264834 | 0.393118 | 0.001040 |
-| postgres | bench_auto | 0.877825 | 0.319960 | 0.001027 |
-| postgres | bench_uuid | 0.875079 | 0.426984 | 0.001614 |
+| mysql | bench_auto | 18.302677 | 0.287904 | 0.000843 |
+| mysql | bench_uuid_char | 18.567982 | 0.286554 | 0.001286 |
+| mysql | bench_uuid_bin | 18.016458 | 0.268081 | 0.001124 |
+| postgres | bench_auto | 6.214916 | 0.235860 | 0.000850 |
+| postgres | bench_uuid | 6.431976 | 0.243786 | 0.003214 |
 
-## 評価（上記2回の結果ベース）
+Run 3:
 
-- Insert は PostgreSQL が MySQL より速い傾向（約 0.88-1.02 秒 vs 約 2.14-2.53 秒）。
-- MySQL 内比較では、Insert は `bench_auto` が最速、UUID では `bench_uuid_bin` が `bench_uuid_char` より速い傾向。
-- Point Lookup は MySQL では `bench_uuid_bin` が良好な回があり、PostgreSQL では `bench_auto` が `bench_uuid` より速い傾向。
-- `range_or_orderby_sec` は全体的に非常に短く、差分が小さいためこの条件では優劣を断定しづらい。
-- `--lookups 2000` 指定でも `point_lookups` が 1000 なのは、実装が「挿入済み件数（rows）を上限」にしているため。
+| db | table | insert_sec | point_sec | range_or_orderby_sec |
+| --- | --- | ---: | ---: | ---: |
+| mysql | bench_auto | 18.146893 | 0.276196 | 0.000689 |
+| mysql | bench_uuid_char | 18.042769 | 0.293410 | 0.001228 |
+| mysql | bench_uuid_bin | 17.877042 | 0.293287 | 0.001147 |
+| postgres | bench_auto | 6.170988 | 0.297306 | 0.000847 |
+| postgres | bench_uuid | 6.288569 | 0.283096 | 0.003483 |
+
+平均（3回）:
+
+| db | table | avg_insert_sec | avg_point_sec | avg_range_or_orderby_sec |
+| --- | --- | ---: | ---: | ---: |
+| mysql | bench_auto | 18.214045 | 0.278458 | 0.000823 |
+| mysql | bench_uuid_char | 18.463042 | 0.284146 | 0.001272 |
+| mysql | bench_uuid_bin | 25.597955 | 0.285866 | 0.001217 |
+| postgres | bench_auto | 6.151904 | 0.257918 | 0.000846 |
+| postgres | bench_uuid | 6.354508 | 0.282646 | 0.003402 |
+
+## 考察（上記3回の結果ベース）
+
+- 全体として PostgreSQL の Insert は MySQL より速い（約 6.15-6.35 秒 vs 約 18.21-25.60 秒）。
+- MySQL の Insert は `bench_auto` が最速で、`bench_uuid_char` はわずかに遅い。`bench_uuid_bin` は Run 1 の 40.9 秒が平均を押し上げた。
+- MySQL の Point Lookup は `bench_auto` / `bench_uuid_char` / `bench_uuid_bin` がほぼ同水準（0.27-0.29 秒台）。
+- PostgreSQL は Insert/Point Lookup ともに `bench_auto` が `bench_uuid` より速い傾向。
+- `range_or_orderby_sec` は PostgreSQL の `bench_uuid` が他より一貫して遅い（約 0.0032-0.0035 秒）。
 
 補足:
 
-- 1000件規模だと揺れが出やすいため、`--rows 100000 --lookups 20000` で複数回実行し、平均・中央値で比較するのがおすすめです。
+- MySQL `bench_uuid_bin` の Run 1（40.900365 秒）は外れ値の可能性があるため、中央値でも比較すると傾向を判断しやすいです。
+- より安定した比較のため、`--rows 100000 --lookups 20000` で複数回実行し、平均・中央値を併記するのがおすすめです。
