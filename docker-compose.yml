@@ -1,0 +1,37 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: uuid_bench_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: idbench
+      MYSQL_USER: bench
+      MYSQL_PASSWORD: bench
+    ports:
+      - "3306:3306"
+    command:
+      - --innodb_flush_log_at_trx_commit=1
+      - --sync_binlog=1
+      - --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  postgres:
+    image: postgres:16
+    container_name: uuid_bench_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: idbench
+      POSTGRES_USER: bench
+      POSTGRES_PASSWORD: bench
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bench -d idbench"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
