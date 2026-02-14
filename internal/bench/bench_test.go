@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestDefaultConfig(t *testing.T) {
+func Testデフォルト設定_既定値を返す(t *testing.T) {
 	cfg := DefaultConfig()
 	if cfg.Rows != 100000 {
 		t.Fatalf("Rows = %d, want 100000", cfg.Rows)
@@ -23,7 +23,7 @@ func TestDefaultConfig(t *testing.T) {
 	}
 }
 
-func TestUUIDRoundTrip(t *testing.T) {
+func TestUUID変換_往復で同一値になる(t *testing.T) {
 	u := uuid.New()
 	b := UUIDToBytes(u)
 	if len(b) != 16 {
@@ -38,7 +38,7 @@ func TestUUIDRoundTrip(t *testing.T) {
 	}
 }
 
-func TestFormatResults(t *testing.T) {
+func Test結果整形_CSV形式で出力する(t *testing.T) {
 	out := FormatResults([]Result{
 		{
 			DB:               "mysql",
@@ -58,7 +58,7 @@ func TestFormatResults(t *testing.T) {
 	}
 }
 
-func TestChunkBounds(t *testing.T) {
+func Testチャンク境界_分割範囲を返す(t *testing.T) {
 	bounds := ChunkBounds(10, 4)
 	want := [][2]int{{0, 4}, {4, 8}, {8, 10}}
 	if len(bounds) != len(want) {

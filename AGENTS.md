@@ -50,18 +50,20 @@ package user
 
 import "testing"
 
-func Testユーザー取得_ID指定(t *testing.T) {
-    // まだ GetUserByID は存在しない状態
-    userID := 1
-    
-    user, err := GetUserByID(userID)
-    
-    if err != nil {
-        t.Errorf("expected no error, got %v", err)
-    }
-    if user.ID != userID {
-        t.Errorf("expected user ID %d, got %d", userID, user.ID)
-    }
+func TestGetUserByID(t *testing.T) {
+    t.Run("ユーザー取得_ID指定", func(t *testing.T) {
+        // まだ GetUserByID は存在しない状態
+        userID := 1
+        
+        user, err := GetUserByID(userID)
+        
+        if err != nil {
+            t.Errorf("expected no error, got %v", err)
+        }
+        if user.ID != userID {
+            t.Errorf("expected user ID %d, got %d", userID, user.ID)
+        }
+    })
 }
 
 // この時点で go test を実行すると失敗する（関数が未定義）
@@ -70,7 +72,7 @@ func Testユーザー取得_ID指定(t *testing.T) {
 ### テーブル駆動テスト
 ```go
 // user_test.go
-func Testユーザーバリデーション(t *testing.T) {
+func TestValidateUser(t *testing.T) {
     tests := []struct {
         name    string
         input   User
@@ -249,9 +251,9 @@ project/
 
 ## ルール
 - テストは実装前に必ず作成
-- **テスト名（test name）は日本語で記載**
-  - 理由: Test Explorer 上で一覧した際に、仕様単位でのテストケース漏れを視認しやすくするため
-  - 例: `Test金額計算_手数料込み`、`Test集計条件_週間合計10万円超`
+- **テスト関数名は英語で記載し、実行名（`t.Run` の名前）は日本語で記載**
+  - 理由: Go の命名規則と可読性を保ちつつ、Test Explorer 上では仕様単位で視認しやすくするため
+  - 例: `func TestCalculateAmount(t *testing.T)` の中で `t.Run("金額計算_手数料込み", ...)`
 - `_test.go` ファイルを先に作る
 - インターフェースを先に定義（外部API用、内部実装のモック用ではない）
 - テストコードは読みやすく保守しやすい構造
