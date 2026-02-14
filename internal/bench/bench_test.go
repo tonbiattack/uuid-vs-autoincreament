@@ -8,6 +8,7 @@ import (
 )
 
 func Testデフォルト設定_既定値を返す(t *testing.T) {
+	// 既定値が想定どおりであることを確認する。
 	cfg := DefaultConfig()
 	if cfg.Rows != 100000 {
 		t.Fatalf("Rows = %d, want 100000", cfg.Rows)
@@ -24,6 +25,7 @@ func Testデフォルト設定_既定値を返す(t *testing.T) {
 }
 
 func TestUUID変換_往復で同一値になる(t *testing.T) {
+	// UUID -> []byte -> UUID の往復変換で値が保持されることを確認する。
 	u := uuid.New()
 	b := UUIDToBytes(u)
 	if len(b) != 16 {
@@ -39,6 +41,7 @@ func TestUUID変換_往復で同一値になる(t *testing.T) {
 }
 
 func Test結果整形_CSV形式で出力する(t *testing.T) {
+	// CSV ヘッダと 1 行分のデータが含まれることを確認する。
 	out := FormatResults([]Result{
 		{
 			DB:               "mysql",
@@ -59,6 +62,7 @@ func Test結果整形_CSV形式で出力する(t *testing.T) {
 }
 
 func Testチャンク境界_分割範囲を返す(t *testing.T) {
+	// total=10 を chunk=4 で分割したときの境界を検証する。
 	bounds := ChunkBounds(10, 4)
 	want := [][2]int{{0, 4}, {4, 8}, {8, 10}}
 	if len(bounds) != len(want) {
