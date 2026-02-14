@@ -119,4 +119,12 @@ Run 3:
 - MySQL では `bench_uuid_char` より `bench_uuid_bin` の Insert が速い。
 - `range_or_orderby_sec` は絶対値が小さく、環境ノイズの影響を受けやすい。
 
+## まとめ（計測結果の解釈）
+
+- 主キーの完全一致検索性能を重視するなら、両DBとも `AUTO_INCREMENT / BIGSERIAL` が第一候補。
+- UUID を使うなら、少なくとも MySQL では `CHAR(36)` より `BINARY(16)` を優先する価値が高い。
+- PostgreSQL では今回条件で `bench_auto` が Insert / Point Lookup ともに優勢だったため、性能最優先なら連番主キーが無難。
+- MySQL の Insert は `bench_auto` と `bench_uuid_bin` が近く、ワークロード次第で逆転しうるため、最終判断は本番に近い件数・同時実行数で再計測する。
+- `range_or_orderby_sec` は差が小さいため、この指標単体で主キー方式を決めない。
+
 - さらに精度を上げる場合は `RUNS=5` 以上での比較を推奨。
