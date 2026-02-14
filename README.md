@@ -103,6 +103,19 @@ Run 3:
 | postgres | bench_auto | 6.151904 | 0.257918 | 0.000846 |
 | postgres | bench_uuid | 6.354508 | 0.282646 | 0.003402 |
 
+## UUID vs AUTO_INCREMENT（今回データの要約）
+
+- MySQL（平均）
+- Insert: `AUTO_INCREMENT` (`bench_auto` 18.214s) が `UUID(CHAR)` (18.463s) と `UUID(BINARY)` (25.598s) より速い。
+- Point Lookup: `AUTO_INCREMENT` (0.278s) と UUID 系 (0.284-0.286s) はほぼ同等。
+
+- PostgreSQL（平均）
+- Insert: `AUTO_INCREMENT` 相当 (`bench_auto` 6.152s) が `UUID` (6.355s) より速い。
+- Point Lookup: `AUTO_INCREMENT` 相当 (0.258s) が `UUID` (0.283s) より速い。
+
+- 結論（この3回の条件）
+- 一貫して `AUTO_INCREMENT` 側が有利。特に PostgreSQL の Point Lookup と、MySQL の Insert（vs UUID BINARY）で差が出た。
+
 ## 考察（上記3回の結果ベース）
 
 - 全体として PostgreSQL の Insert は MySQL より速い（約 6.15-6.35 秒 vs 約 18.21-25.60 秒）。
