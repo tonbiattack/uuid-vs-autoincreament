@@ -6,15 +6,13 @@ MySQL / PostgreSQL で `AUTO_INCREMENT`(連番) と `UUID` 主キーの性能差
 
 ```bash
 docker compose up -d
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
+go mod tidy
 ```
 
 ## ベンチマーク実行
 
 ```bash
-python benchmarks/benchmark_ids.py --rows 100000 --lookups 20000
+go run ./cmd/benchmark_ids --rows 100000 --lookups 20000
 ```
 
 実行すると以下を計測します。
@@ -37,7 +35,7 @@ python benchmarks/benchmark_ids.py --rows 100000 --lookups 20000
 ## オプション
 
 ```bash
-python benchmarks/benchmark_ids.py --help
+go run ./cmd/benchmark_ids --help
 ```
 
 主なオプション:

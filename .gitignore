@@ -1,1 +1,6 @@
+bin/
+dist/
+*.exe
+*.out
+*.test
 主キーはAUTO_INCREMENTとUUIDどちらを選ぶべきか.md
