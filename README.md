@@ -12,7 +12,14 @@ go mod tidy
 ## ベンチマーク実行
 
 ```bash
+# 1) 軽量確認
+go run ./cmd/benchmark_ids --rows 10000 --lookups 2000
+
+# 2) 本番比較（推奨）
 go run ./cmd/benchmark_ids --rows 100000 --lookups 20000
+
+# 3) 余裕があれば
+go run ./cmd/benchmark_ids --rows 300000 --lookups 60000
 ```
 
 実行すると以下を計測します。
